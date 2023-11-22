@@ -2,7 +2,12 @@ package backend.crypt;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -44,12 +49,12 @@ public class RSAKeys {
         // byte[] encodedKey = new String(Base64.getEncoder().encode(keyBytes));
         byte[] encodedKey = Base64.getEncoder().encode(keyBytes);
 
-        try (FileOutputStream fos = new FileOutputStream(filePath)){
+        try (FileOutputStream fos = new FileOutputStream(filePath)) {
             fos.write(encodedKey);
         }
 
         // try (PrintWriter out = new PrintWriter(filePath)) {
-            // out.println(encodedKey);
+        // out.println(encodedKey);
         // }
 
     }
@@ -78,7 +83,7 @@ public class RSAKeys {
         byte[] decodedKey = Base64.getDecoder().decode(pubKeyStr);
 
         X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decodedKey);
-        
+
         KeyFactory keyFactory;
 
         try {
@@ -93,10 +98,52 @@ public class RSAKeys {
 
         }
 
-            
-
         return null;
 
     }
+
+    public PublicKey getPublicKey() {
+
+        // read public key from file
+        Path filePath = Paths.get("./data/id_rsa.pub").toAbsolutePath();
+
+        String key;
+
+        try {
+
+            key = new String(Files.readAllBytes(filePath), StandardCharsets.UTF_8);
+            PublicKey pubkey = convertPublicKey(key);
+            return pubkey;
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+
+        }
+
+        return null;
+    }
+
+    public String getPublicKeyStr() {
+
+        // read public key from file
+        Path filePath = Paths.get("./data/id_rsa.pub").toAbsolutePath();
+
+        String pubKeyStr;
+
+        try {
+
+            pubKeyStr = new String(Files.readAllBytes(filePath), StandardCharsets.UTF_8);
+            return pubKeyStr;
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+
+        }
+
+        return null;
+    }
+ 
 
 }
