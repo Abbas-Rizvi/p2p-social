@@ -1,5 +1,8 @@
 package network;
 
+import java.io.Serializable;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -9,7 +12,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PeersDatabase {
+public class PeersDatabase implements Serializable {
+    private static final long serialVersionUID = 123456789L;
 
     private static final String URL = "jdbc:sqlite:data/known_peers.db";
 
@@ -70,6 +74,24 @@ public class PeersDatabase {
                 Statement statement = connection.createStatement()) {
             String insertDataQuery = "INSERT INTO known_peers (name, public_key, ip_address) VALUES " +
                     "('" + name + "', '" + publicKey + "', '" + ipAddress + "')";
+            statement.executeUpdate(insertDataQuery);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
+    public int insertRecord(Node node) {
+
+        if (isNameExists(node.getUsername())) {
+            return 1;
+        }
+
+        try (Connection connection = connect();
+                Statement statement = connection.createStatement()) {
+            String insertDataQuery = "INSERT INTO known_peers (name, public_key, ip_address) VALUES " +
+                    "('" + node.getUsername()+ "', '" + node.getPubKeyStr() + "', '" + node.getIp() + "')";
             statement.executeUpdate(insertDataQuery);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -214,4 +236,26 @@ public class PeersDatabase {
 
         return allNodes;
     }
+
+    // serialize database to byte[]
+    public byte[] databaseToByteArr() {
+
+        // file path for storage
+        String filePath = "./data/known_peers.db";
+
+        try {
+            Path path = Path.of(filePath);
+            return Files.readAllBytes(path);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public void mergeDatabase() {
+
+    }
+
 }

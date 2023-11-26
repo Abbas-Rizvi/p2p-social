@@ -1,12 +1,14 @@
 package backend.blockchain;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.nio.file.Files;
 import java.util.ArrayList;
 
 import backend.crypt.KeyGen;
@@ -14,13 +16,18 @@ import network.NTPTimeService;
 import network.Node;
 import network.PeersDatabase;
 
-public class Blockchain {
+public class Blockchain implements Serializable {
+
+    private static final long serialVersionUID = 123456789L;
 
     ArrayList<Block> blockchain;
     PeersDatabase db = new PeersDatabase();
     KeyGen key = new KeyGen();
     NTPTimeService timeService = new NTPTimeService();
 
+    // ##################
+    // Constructor
+    // ##################
     public Blockchain() {
 
         // file path for storage
@@ -35,15 +42,24 @@ public class Blockchain {
             blockchain = new ArrayList<Block>();
 
             // genesis header
-            BlockHeader genHeader = new BlockHeader(timeService.getNTPDate().getTime(), "", "POST",
+            BlockHeader genHeader = new BlockHeader(timeService.getNTPDate().getTime(), "", "GEN",
                     db.lookupNameByPublicKey(key.getPublicKeyStr()));
             // create genesis block
             appendBlock(new Post("", "Genesis Block", genHeader, key.getPrivatKey()));
 
         } else {
-            readChain(storeBlockchain);
+
+            this.blockchain = deserialize(readChain(storeBlockchain)).getBlockchain();
         }
 
+    }
+
+    // ##################
+    // Blockchain Functions
+    // ##################
+
+    private ArrayList<Block> getBlockchain() {
+        return blockchain;
     }
 
     // update chain with new block
@@ -55,116 +71,8 @@ public class Blockchain {
             System.out.println("invalid addition!");
 
         // update chain
-        storeChain();
+        storeChain(serialize());
 
-    }
-
-    // // read blockchain from byte arr
-    // public void byteArrToBlockchain(byte[] chainBytes) {
-
-    //     byte[] byteArray = chainBytes;
-    //     File outputFile = new File("path/to/your/output/file.txt");
-
-    //     try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-    //         fos.write(byteArray);
-    //         System.out.println("Byte array to file conversion successful.");
-    //     } catch (IOException e) {
-    //         e.printStackTrace();
-    //     }
-
-    // }
-
-    // // get the blockchain file stored
-    // public byte[] blockchainToByteArr() {
-
-    //     // file path for storage
-    //     String filePath = "./data/blockchain";
-
-    //     File file = new File(filePath);
-
-    //     try (FileInputStream fis = new FileInputStream(file)) {
-    //         byte[] byteArray = new byte[(int) file.length()];
-    //         fis.read(byteArray);
-
-    //         return byteArray;
-    //     } catch (Exception e) {
-    //         e.printStackTrace();
-    //     }
-
-    //     return null;
-    // }
-
-    // store blockchain
-    public byte[] storeChain() {
-
-        // file path for storage
-        String filePath = "./data/blockchain";
-
-        try {
-
-            // create file and object output streams
-            FileOutputStream file = new FileOutputStream(filePath);
-            ObjectOutputStream oos = new ObjectOutputStream(file);
-
-            // write chain to stream
-            byte[] byteRes = oos.writeObject(this);
-
-            System.out.println("Blockchain has been saved");
-
-            return file.
-            oos.close(); 
-        } catch (Exception e) {
-
-            e.printStackTrace();
-        }
-
-    }
-
-    // read from file
-    public Blockchain readChain(byte[] chainBytes) {
-
-
-        try {
-            ByteArrayInputStream file = new ByteArrayInputStream(chainBytes);
-
-            // Creates an ObjectOutputStream
-            ObjectInputStream ois = new ObjectInputStream(file);
-
-            return ((Blockchain) ois.readObject());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;
-
-    }
-
-    // read from file
-    public Blockchain readChain(File chainFile) {
-
-        // file path for storage
-        String filePath = "./data/blockchain";
-
-        try {
-            FileInputStream file = new FileInputStream(filePath);
-
-            // Creates an ObjectOutputStream
-            ObjectInputStream ois = new ObjectInputStream(file);
-
-            return ((Blockchain) ois.readObject());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;
-
-    }
-
-    //
-    private ArrayList<Block> getChain() {
-        return blockchain;
     }
 
     // use to select branch of chain to use
@@ -195,7 +103,12 @@ public class Blockchain {
         return blockchain.size();
     }
 
+    // check if a block addition is valid
     public boolean validAddition(Block newBlock) {
+
+        // base case for genesis block
+        if (newBlock instanceof Post && newBlock.getData().equals("Genesis Block"))
+            return true;
 
         Block previousBlock = blockchain.get(blockchain.size() - 1);
 
@@ -205,7 +118,7 @@ public class Blockchain {
         // validate current block signature from known peers
         for (Node node : db.readAllNodes()) {
 
-            if (newBlock.validSignature(node.getPubKey())) {
+            if (newBlock.validSignature(key.convertPublicKey(node.getPubKeyStr()))) {
                 validCur = true;
                 break;
             }
@@ -219,7 +132,7 @@ public class Blockchain {
         // validate previous block signature from known peers
         for (Node node : db.readAllNodes()) {
 
-            if (previousBlock.validSignature(node.getPubKey())) {
+            if (previousBlock.validSignature(key.convertPublicKey(node.getPubKeyStr()))) {
                 validPrev = true;
                 break;
             }
@@ -240,6 +153,91 @@ public class Blockchain {
 
         return currentBlock.getHash();
 
+    }
+
+    // ##################
+    // IO Functions
+    // ##################
+
+    // read blockchain from byte[]
+    public Blockchain deserialize(byte[] chainBytes) {
+
+        try {
+            ByteArrayInputStream byteArrayIn = new ByteArrayInputStream(chainBytes);
+            ObjectInputStream ois = new ObjectInputStream(byteArrayIn);
+
+            // cast input to object
+            Object obj = ois.readObject();
+
+            if (obj instanceof Blockchain) {
+                return (Blockchain) obj;
+            } else {
+                return null;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    // convert blockchain to a byte[]
+    public byte[] serialize() {
+
+        try {
+
+            // create output streams
+            ByteArrayOutputStream byteArrayOut = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(byteArrayOut);
+
+            // Write the object to the byte array stream
+            oos.writeObject(this);
+
+            // get byte array from the output stream
+            byte[] byteArray = byteArrayOut.toByteArray();
+
+            return byteArray;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    // store blockchain
+    public void storeChain(byte[] byteArray) {
+
+        // file path for storage
+        String filePath = "./data/blockchain";
+
+        // write byte array to file
+        try {
+            FileOutputStream fos = new FileOutputStream(filePath);
+            fos.write(byteArray);
+            System.out.println("blockchain saved");
+            fos.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    // read from stored chain
+    public byte[] readChain(File inputFile) {
+
+        try {
+
+            byte[] fileContent = Files.readAllBytes(inputFile.toPath());
+            return fileContent;
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
 }

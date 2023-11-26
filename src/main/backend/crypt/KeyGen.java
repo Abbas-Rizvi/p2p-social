@@ -3,6 +3,7 @@ package backend.crypt;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,10 +17,14 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
-public class KeyGen {
+public class KeyGen implements Serializable{
+
+    private static final long serialVersionUID = 123456789L;
+
 
     private static final String RSA = "RSA";
 
@@ -184,7 +189,7 @@ public class KeyGen {
         // Decode the Base64-encoded public key
         byte[] decodedKey = Base64.getDecoder().decode(privKeyString);
 
-        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decodedKey);
+        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decodedKey);
 
         KeyFactory keyFactory;
 

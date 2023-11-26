@@ -4,12 +4,16 @@ import org.apache.commons.net.ntp.NTPUDPClient;
 import org.apache.commons.net.ntp.TimeInfo;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.Date;
 
-public class NTPTimeService {
+public class NTPTimeService implements Serializable{
 
-    public static Date getNTPDate() {
+    private static final long serialVersionUID = 123456789L;
+
+
+    public Date getNTPDate() {
 
         // time server
         String[] hosts = new String[] {
@@ -19,7 +23,7 @@ public class NTPTimeService {
         // create NTP UDP client`
         NTPUDPClient client = new NTPUDPClient();
 
-        // set time out
+        
         client.setDefaultTimeout(5000);
 
         for (String host : hosts) {

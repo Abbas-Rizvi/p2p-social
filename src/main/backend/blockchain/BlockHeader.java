@@ -1,16 +1,17 @@
 package backend.blockchain;
 
-import java.security.Signature;
+import java.io.Serializable;
 
 // header for data block
 // outline message intent
-public class BlockHeader {
+public class BlockHeader implements Serializable {
+
+    private static final long serialVersionUID = 123456789L;
 
     private long time;
     private String recipient;
     private String msgType;
     private String sender;
-    private Signature sig;
 
 
     public BlockHeader(long time, String recipient, String msgType, String sender) {

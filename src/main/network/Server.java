@@ -1,6 +1,8 @@
 package network;
 
-import java.util.ArrayList;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 import java.util.List;
 
 import backend.blockchain.Block;
@@ -17,11 +19,13 @@ public class Server extends Thread {
     static KeyGen key = new KeyGen();
     static String pubKey = key.getPublicKeyStr();
     // static Node node = new Node("jim", key, "127.0.0.1");
-    
+
+    // static String ip = InetAddress.getLocalHost().toString();
+
+    static Node localNode = new Node("Test", pubKey, "192.168.2.24");
 
     static Blockchain blockchain = new Blockchain();
     static NTPTimeService timeService = new NTPTimeService();
-
 
     public void setup() {
 
@@ -34,13 +38,13 @@ public class Server extends Thread {
     }
 
     public static void main(String[] args) {
-        // // Create and start a thread for each peer
-        // for (String peerAddress : peerAddresses) {
-        // Thread thread = new Thread(new PeerToPeerConnector(peerAddress, peerPort));
-        // thread.start();
-        // }
+
 
         String user = db.lookupNameByPublicKey(pubKey);
+
+        if (db.insertRecord(localNode) == 1){
+            System.out.println("User " + localNode.getUsername() + " aleady exists!");
+        }
 
         System.out.println("Execution Started");
 
@@ -49,40 +53,49 @@ public class Server extends Thread {
 
         List<Node> peers = db.readAllNodes();
 
-       
-
-
-
         nodeListen.start();
-
 
         System.out.println("Code is running ");
 
-
-        BlockHeader msg1h = new BlockHeader(timeService.getNTPDate().getTime(), "public", "POST",user);
+        BlockHeader msg1h = new BlockHeader(timeService.getNTPDate().getTime(), "public", "POST", user);
         Block msg1 = new Post(blockchain.lastHash(), "Test Post", msg1h, key.getPrivatKey());
 
         blockchain.appendBlock(msg1);
 
-        SockMessage msg2 = new SockMessage("BLOCKCHAIN", timeService.getNTPDate().getTime(),bloc;
-        for (Node node : peers){
+        SockMessage msg2 = new SockMessage("BLOCKCHAIN", timeService.getNTPDate().getTime());
+
+        for (Node node : peers) {
+
+            try {
+                // create socket channel
+                SocketChannel socketChannel = SocketChannel.open();
+                InetSocketAddress addr = new InetSocketAddress(node.getIp(), node.getPORT());
+                // connect without blocking
+                socketChannel.configureBlocking(false);
+
+                if (socketChannel.connect(addr)) {
+
+                    // Send the file bytes
+                    ByteBuffer buffer = ByteBuffer.wrap(msg2.getFile());
+                    socketChannel.write(buffer);
+                }
+
+            } catch (Exception e) {
+                System.err.println("unable to connect to " + node.getIp() + "; " + e);
+            }
+
         }
-        
 
     }
-
-
 
     // Handle the running of the server
     // run on thread to not interupt main program
     @Override
     public void run() {
 
-        
         System.out.println("Server listening...");
-        node.listener();
+        localNode.listener();
 
     }
-
 
 }

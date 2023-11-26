@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 
 import org.junit.Test;
@@ -64,6 +65,30 @@ public class RSAKeysTest {
         assertNotNull(pubkey);
         
 
+    }
+
+
+    @Test
+    public void testConvertPrivateKey() throws IOException {
+
+        //setup key if not already exist
+        try {
+            genKey.generateRSAKkeyPair();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // read public key from file
+        Path filePath = Paths.get("./data/id_rsa").toAbsolutePath();
+
+        // String key = Files.readString(filePath);
+        String key = new String(Files.readAllBytes(filePath), StandardCharsets.UTF_8);
+
+
+        PrivateKey privKey = genKey.convertPrivateKey(key);
+
+        assertNotNull(privKey);
+        
 
     }
 

@@ -3,29 +3,31 @@ package network;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.security.PublicKey;
-import java.security.interfaces.RSAKey;
 import java.util.Iterator;
 
+import backend.blockchain.Blockchain;
 import backend.crypt.KeyGen;
 
-public class Node {
+public class Node implements Serializable{
 
+    private static final long serialVersionUID = 123456789L;
+
+    
     // constant for port
     private final int PORT = 5687;
 
     private String username;
     private PublicKey pubKey;
+    private String pubKeyStr;
     private String ip;
-    private Socket socket;
 
     Selector selector;
 
@@ -34,11 +36,20 @@ public class Node {
         // store variables
         this.username = username;
         this.ip = ip;
+        this.pubKeyStr = pubKeyStr;
+
+
+
+    }
+
+    public PublicKey getPublicKey(){
 
         // decode public key
         KeyGen KeyDecode = new KeyGen();
         pubKey = KeyDecode.convertPublicKey(pubKeyStr);
 
+
+        return pubKey;
     }
 
     // listen for connections, handle in non blocking manner
@@ -85,7 +96,6 @@ public class Node {
             }
 
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
@@ -100,9 +110,6 @@ public class Node {
         socketChannel.configureBlocking(false);
         socketChannel.register(selector, SelectionKey.OP_READ);
         System.out.println("Connection accepted from: " + socketChannel.getRemoteAddress());
-
-
-
 
     }
 
@@ -148,11 +155,9 @@ public class Node {
 
         } catch (IOException | ClassNotFoundException e) {
 
-            // TODO Auto-generated catch block
             e.printStackTrace();
 
         }
-
 
         // handle message using appropriate method
         switch (msg.getType()) {
@@ -161,7 +166,7 @@ public class Node {
 
                 break;
             case "BLOCKCHAIN":
-                
+
                 break;
 
             default:
@@ -169,22 +174,33 @@ public class Node {
         }
 
         // if message passed was blockchain
-        if (msg.getType().equalsIgnoreCase("BLOCKCHAIN")){
+        if (msg.getType().equalsIgnoreCase("BLOCKCHAIN")) {
 
-            //TODO
+            // send to blockchain to handle conflicts and merge
+            Blockchain blockchain = new Blockchain();
+            blockchain.manageConflicts(blockchain.deserialize(msg.getFile()));
         }
 
-
-
-        
     }
 
     public PublicKey getPubKey() {
         return pubKey;
     }
 
-    public void setPubKey(PublicKey pubKey) {
-        this.pubKey = pubKey;
+    public String getPubKeyStr(){
+        return pubKeyStr;
+    }
+
+    public int getPORT() {
+        return PORT;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public String getUsername() {
+        return username;
     }
 
 }

@@ -11,6 +11,8 @@ import java.util.Base64;
 import network.NTPTimeService;
 
 public class Post implements Block {
+    private static final long serialVersionUID = 123456789L;
+
 
     private NTPTimeService timeService; // for contacting time server
 
@@ -148,5 +150,12 @@ public class Post implements Block {
     public String getHash(){
         return hash;
     }
+
+    public String getData() {
+        return data;
+    }
+
+
+    
 
 }
