@@ -137,10 +137,16 @@ public class Post implements Block {
         }
     }
 
+    //get previous hash
     @Override
     public String getPrevHash() {
      
         return prevHash;
+    }
+
+    // get current hash
+    public String getHash(){
+        return hash;
     }
 
 }

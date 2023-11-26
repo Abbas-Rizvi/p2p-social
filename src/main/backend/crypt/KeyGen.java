@@ -3,7 +3,6 @@ package backend.crypt;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,6 +12,7 @@ import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -75,6 +75,10 @@ public class KeyGen {
             return false;
 
     }
+
+    //##########################
+    // Public key functions
+    //##########################
 
     // connverts encoded public key to publicKey object
     public PublicKey convertPublicKey(String pubKeyStr) {
@@ -144,6 +148,82 @@ public class KeyGen {
 
         return null;
     }
- 
+
+
+
+    //##########################
+    // Private key functions
+    //##########################
+
+
+    public String getPrivateKeyString() {
+
+        // read public key from file
+        Path filePath = Paths.get("./data/id_rsa").toAbsolutePath();
+
+        String privKeyString;
+
+        try {
+
+            privKeyString = new String(Files.readAllBytes(filePath), StandardCharsets.UTF_8);
+            return privKeyString;
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+
+        }
+
+        return null;
+    }
+
+
+    // connverts encoded public key to publicKey object
+    public PrivateKey convertPrivateKey(String privKeyString) {
+
+        // Decode the Base64-encoded public key
+        byte[] decodedKey = Base64.getDecoder().decode(privKeyString);
+
+        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decodedKey);
+
+        KeyFactory keyFactory;
+
+        try {
+
+            keyFactory = KeyFactory.getInstance("RSA");
+            PrivateKey privKey = keyFactory.generatePrivate(keySpec);
+            return privKey;
+
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+
+            e.printStackTrace();
+
+        }
+
+        return null;
+
+    }
+
+    public PrivateKey getPrivatKey() {
+
+        // read public key from file
+        Path filePath = Paths.get("./data/id_rsa").toAbsolutePath();
+
+        String key;
+
+        try {
+
+            key = new String(Files.readAllBytes(filePath), StandardCharsets.UTF_8);
+            PrivateKey privKey = convertPrivateKey(key);
+            return privKey;
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+
+        }
+
+        return null;
+    }
 
 }

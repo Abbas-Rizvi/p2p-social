@@ -62,12 +62,9 @@ public class PeersDatabase {
 
     public int insertRecord(String name, String publicKey, String ipAddress) {
 
-
-        if (isNameExists(name)){
+        if (isNameExists(name)) {
             return 1;
         }
-
-
 
         try (Connection connection = connect();
                 Statement statement = connection.createStatement()) {
@@ -81,11 +78,10 @@ public class PeersDatabase {
         return 0;
     }
 
-
-      public boolean isNameExists(String name) {
+    public boolean isNameExists(String name) {
         try (Connection connection = connect();
-             PreparedStatement preparedStatement = connection.prepareStatement(
-                     "SELECT COUNT(*) AS count FROM known_peers WHERE name = ?")) {
+                PreparedStatement preparedStatement = connection.prepareStatement(
+                        "SELECT COUNT(*) AS count FROM known_peers WHERE name = ?")) {
 
             preparedStatement.setString(1, name);
 
@@ -101,8 +97,6 @@ public class PeersDatabase {
 
         return false;
     }
-
-
 
     public String lookupPublicKeyByName(String name) {
         try (Connection connection = connect();
@@ -130,6 +124,26 @@ public class PeersDatabase {
                     return resultSet.getString("ip_address");
                 } else {
                     return null; // Name not found
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public String lookupNameByPublicKey(String publicKey) {
+        try (Connection connection = connect();
+                PreparedStatement preparedStatement = connection.prepareStatement(
+                        "SELECT name FROM known_peers WHERE public_key = ?")) {
+
+            preparedStatement.setString(1, publicKey);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getString("name");
+                } else {
+                    return null;
                 }
             }
         } catch (SQLException e) {
@@ -177,20 +191,19 @@ public class PeersDatabase {
         }
     }
 
-
-      public List<Node> readAllNodes() {
+    public List<Node> readAllNodes() {
         List<Node> allNodes = new ArrayList<>();
 
         try (Connection connection = connect();
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery("SELECT * FROM known_peers")) {
+                Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery("SELECT * FROM known_peers")) {
 
             while (resultSet.next()) {
 
                 Node node = new Node(
-                    resultSet.getString("name"),
-                    resultSet.getString("public_key"),
-                    resultSet.getString("ip_address"));
+                        resultSet.getString("name"),
+                        resultSet.getString("public_key"),
+                        resultSet.getString("ip_address"));
 
                 allNodes.add(node);
             }

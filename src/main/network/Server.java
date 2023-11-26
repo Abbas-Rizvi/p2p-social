@@ -1,19 +1,27 @@
 package network;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import backend.blockchain.Block;
+import backend.blockchain.BlockHeader;
+import backend.blockchain.Blockchain;
+import backend.blockchain.Post;
 import backend.crypt.KeyGen;
 
 public class Server extends Thread {
 
-    PeersDatabase db = new PeersDatabase();
+    static PeersDatabase db = new PeersDatabase();
 
     // ArrayList<
-    static KeyGen keys = new KeyGen();
+    static KeyGen key = new KeyGen();
+    static String pubKey = key.getPublicKeyStr();
+    // static Node node = new Node("jim", key, "127.0.0.1");
+    
 
-    static String key = keys.getPublicKeyStr();
+    static Blockchain blockchain = new Blockchain();
+    static NTPTimeService timeService = new NTPTimeService();
 
-    static Node node = new Node("jim", key, "127.0.0.1");
 
     public void setup() {
 
@@ -32,11 +40,18 @@ public class Server extends Thread {
         // thread.start();
         // }
 
-        System.out.println("Execution Started");
+        String user = db.lookupNameByPublicKey(pubKey);
 
+        System.out.println("Execution Started");
 
         Server server = new Server();
         Thread nodeListen = new Thread(server);
+
+        List<Node> peers = db.readAllNodes();
+
+       
+
+
 
         nodeListen.start();
 
@@ -44,11 +59,15 @@ public class Server extends Thread {
         System.out.println("Code is running ");
 
 
-        while(true){
+        BlockHeader msg1h = new BlockHeader(timeService.getNTPDate().getTime(), "public", "POST",user);
+        Block msg1 = new Post(blockchain.lastHash(), "Test Post", msg1h, key.getPrivatKey());
 
-            System.out.println("run");
+        blockchain.appendBlock(msg1);
 
+        SockMessage msg2 = new SockMessage("BLOCKCHAIN", timeService.getNTPDate().getTime(),bloc;
+        for (Node node : peers){
         }
+        
 
     }
 

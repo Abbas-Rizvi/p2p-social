@@ -14,5 +14,6 @@ public interface Block {
 
     public String signBlock(PrivateKey privKey);
     public boolean validSignature(PublicKey pubKey);
+    public String getHash();
 
 }
