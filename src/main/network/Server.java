@@ -2,14 +2,14 @@ package network;
 
 import java.util.ArrayList;
 
-import backend.crypt.RSAKeys;
+import backend.crypt.KeyGen;
 
 public class Server extends Thread {
 
-    KeyDBHelper db = new KeyDBHelper();
+    PeersDatabase db = new PeersDatabase();
 
     // ArrayList<
-    static RSAKeys keys = new RSAKeys();
+    static KeyGen keys = new KeyGen();
 
     static String key = keys.getPublicKeyStr();
 

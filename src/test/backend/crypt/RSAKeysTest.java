@@ -13,11 +13,11 @@ import java.security.PublicKey;
 
 import org.junit.Test;
 
-import backend.crypt.RSAKeys;
+import backend.crypt.KeyGen;
 
 public class RSAKeysTest {
 
-    RSAKeys genKey = new RSAKeys();
+    KeyGen genKey = new KeyGen();
 
     @Test
     public void testGenerateKeys() {

@@ -9,12 +9,12 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class KeyDBHelper {
+public class PeersDatabase {
 
     private static final String URL = "jdbc:sqlite:data/known_peers.db";
 
     // Constructor
-    public KeyDBHelper() {
+    public PeersDatabase() {
         try {
             // Create the table if it doesn't exist
             createTable();

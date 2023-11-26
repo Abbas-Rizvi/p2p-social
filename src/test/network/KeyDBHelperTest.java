@@ -7,12 +7,12 @@ import java.util.List;
 
 import org.junit.Test;
 
-import network.KeyDBHelper;
+import network.PeersDatabase;
 import network.Node;
 
 public class KeyDBHelperTest {
 
-    KeyDBHelper db = new KeyDBHelper();
+    PeersDatabase db = new PeersDatabase();
 
     @Test
     public void testInsertRecord() {

@@ -1,4 +1,4 @@
-package backend.blocks;
+package backend.blockchain;
 
 import java.security.Signature;
 

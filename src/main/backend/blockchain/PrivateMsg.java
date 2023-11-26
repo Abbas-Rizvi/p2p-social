@@ -1,6 +1,9 @@
-package backend.blocks;
+package backend.blockchain;
 
-public class Post implements Block {
+import java.util.Dictionary;
+import java.util.Hashtable;
+
+public class PrivateMsg implements Block {
 
     public BlockHeader header;
 
@@ -18,5 +21,4 @@ public class Post implements Block {
 
 
 
-    
 }

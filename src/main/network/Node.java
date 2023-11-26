@@ -15,7 +15,7 @@ import java.security.PublicKey;
 import java.security.interfaces.RSAKey;
 import java.util.Iterator;
 
-import backend.crypt.RSAKeys;
+import backend.crypt.KeyGen;
 
 public class Node {
 
@@ -36,7 +36,7 @@ public class Node {
         this.ip = ip;
 
         // decode public key
-        RSAKeys KeyDecode = new RSAKeys();
+        KeyGen KeyDecode = new KeyGen();
         pubKey = KeyDecode.convertPublicKey(pubKeyStr);
 
     }
@@ -171,8 +171,20 @@ public class Node {
         // if message passed was blockchain
         if (msg.getType().equalsIgnoreCase("BLOCKCHAIN")){
 
+            //TODO
         }
 
+
+
+        
+    }
+
+    public PublicKey getPubKey() {
+        return pubKey;
+    }
+
+    public void setPubKey(PublicKey pubKey) {
+        this.pubKey = pubKey;
     }
 
 }

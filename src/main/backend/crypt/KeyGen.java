@@ -19,7 +19,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
-public class RSAKeys {
+public class KeyGen {
 
     private static final String RSA = "RSA";
 
