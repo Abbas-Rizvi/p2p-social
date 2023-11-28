@@ -79,7 +79,7 @@ public class Node implements Serializable{
 
                 Iterator<SelectionKey> keyIterator = selector.selectedKeys().iterator();
 
-                // queue for incoming requests
+                // queue for incoming requestsa
                 while (keyIterator.hasNext()) {
                     // remove from queue
                     SelectionKey key = keyIterator.next();
