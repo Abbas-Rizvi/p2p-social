@@ -17,7 +17,7 @@ public class Post implements Block {
     private NTPTimeService timeService; // for contacting time server
 
     // header includes recipient, sender, time, msgtype
-    private BlockHeader header;
+    public BlockHeader header;
 
     private String prevHash;
     private String hash;

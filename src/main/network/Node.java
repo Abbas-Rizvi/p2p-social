@@ -173,7 +173,7 @@ public class Node implements Serializable {
 
             // send node list to database to merge
             PeersDatabase db = new PeersDatabase();
-            db.mergeDatabase(db.deserialize(msg.getFile()));
+            db.mergeDatabase(msg.getFile());
 
 
 

@@ -1,5 +1,9 @@
 package network;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,12 +33,11 @@ public class PeersDatabase implements Serializable {
 
     private Connection connect() throws SQLException {
 
+        Connection connection = null;
         try {
 
             // Register SQLite driver
             Class.forName("org.sqlite.JDBC");
-
-            Connection connection = null;
 
             try {
                 connection = DriverManager.getConnection(URL);
@@ -49,7 +52,7 @@ public class PeersDatabase implements Serializable {
 
         }
 
-        return DriverManager.getConnection(URL);
+        return connection;
     }
 
     private void createTable() throws SQLException {
@@ -91,7 +94,7 @@ public class PeersDatabase implements Serializable {
         try (Connection connection = connect();
                 Statement statement = connection.createStatement()) {
             String insertDataQuery = "INSERT INTO known_peers (name, public_key, ip_address) VALUES " +
-                    "('" + node.getUsername()+ "', '" + node.getPubKeyStr() + "', '" + node.getIp() + "')";
+                    "('" + node.getUsername() + "', '" + node.getPubKeyStr() + "', '" + node.getIp() + "')";
             statement.executeUpdate(insertDataQuery);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -237,15 +240,38 @@ public class PeersDatabase implements Serializable {
         return allNodes;
     }
 
-    // serialize database to byte[]
+    // // serialize database to byte[]
+    // public byte[] serialize() {
+    //
+    // // file path for storage
+    // String filePath = "./data/known_peers.db";
+    //
+    // try {
+    // Path path = Path.of(filePath);
+    // return Files.readAllBytes(path);
+    //
+    // } catch (Exception e) {
+    // e.printStackTrace();
+    // }
+    //
+    // return null;
+    // }
+
+    // Serialize List<Node> to byte[]
     public byte[] serialize() {
 
-        // file path for storage
-        String filePath = "./data/known_peers.db";
+        // get node list
+        List<Node> nodeList = readAllNodes();
 
         try {
-            Path path = Path.of(filePath);
-            return Files.readAllBytes(path);
+            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+            ObjectOutputStream objectStream = new ObjectOutputStream(byteStream);
+
+            // write to object stream
+            objectStream.writeObject(nodeList);
+
+            // get byte array
+            return byteStream.toByteArray();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -254,7 +280,28 @@ public class PeersDatabase implements Serializable {
         return null;
     }
 
-    public void mergeDatabase() {
+    // Deserialize byte[] to List<Node>
+    public void mergeDatabase(byte[] nodesSerial) {
+
+        try {
+            ByteArrayInputStream byteStream = new ByteArrayInputStream(nodesSerial);
+            ObjectInputStream objectStream = new ObjectInputStream(byteStream);
+
+            // Read the List<Node> from the ObjectInputStream
+
+            for (Node node : (List<Node>) objectStream.readObject()) {
+
+                // check if node exists already
+                if (!isNameExists(node.getUsername())) {
+
+                    // insert if does not exist
+                    insertRecord(node);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
