@@ -238,7 +238,7 @@ public class PeersDatabase implements Serializable {
     }
 
     // serialize database to byte[]
-    public byte[] databaseToByteArr() {
+    public byte[] serialize() {
 
         // file path for storage
         String filePath = "./data/known_peers.db";

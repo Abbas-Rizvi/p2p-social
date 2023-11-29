@@ -3,6 +3,7 @@ package network;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -16,11 +17,10 @@ import java.util.Iterator;
 import backend.blockchain.Blockchain;
 import backend.crypt.KeyGen;
 
-public class Node implements Serializable{
+public class Node implements Serializable {
 
     private static final long serialVersionUID = 123456789L;
 
-    
     // constant for port
     private final int PORT = 5687;
 
@@ -38,16 +38,13 @@ public class Node implements Serializable{
         this.ip = ip;
         this.pubKeyStr = pubKeyStr;
 
-
-
     }
 
-    public PublicKey getPublicKey(){
+    public PublicKey getPublicKey() {
 
         // decode public key
         KeyGen KeyDecode = new KeyGen();
         pubKey = KeyDecode.convertPublicKey(pubKeyStr);
-
 
         return pubKey;
     }
@@ -79,7 +76,7 @@ public class Node implements Serializable{
 
                 Iterator<SelectionKey> keyIterator = selector.selectedKeys().iterator();
 
-                // queue for incoming requestsa
+                // queue for incoming requests
                 while (keyIterator.hasNext()) {
                     // remove from queue
                     SelectionKey key = keyIterator.next();
@@ -111,6 +108,10 @@ public class Node implements Serializable{
         socketChannel.register(selector, SelectionKey.OP_READ);
         System.out.println("Connection accepted from: " + socketChannel.getRemoteAddress());
 
+        // utilize file sender to send block chain and node list
+        FileSender fileSender = new FileSender();
+        fileSender.sendAllAssets(socketChannel);
+
     }
 
     // handle send requests from connection
@@ -130,15 +131,17 @@ public class Node implements Serializable{
         }
 
         if (bytesRead > 0) {
+
+            // clear buffer
             buffer.flip();
             byte[] data = new byte[buffer.limit()];
             buffer.get(data);
             System.out.println("Received message from " + socketChannel.getRemoteAddress());
-            decodeMessage(data);
+            decodeMessage(data, socketChannel);
         }
     }
 
-    private static void decodeMessage(byte[] data) {
+    private static void decodeMessage(byte[] data, SocketChannel socketChannel) {
 
         SockMessage msg = null;
         // Convert input read from socket to object
@@ -159,26 +162,35 @@ public class Node implements Serializable{
 
         }
 
-        // handle message using appropriate method
-        switch (msg.getType()) {
-
-            case "NODELIST":
-
-                break;
-            case "BLOCKCHAIN":
-
-                break;
-
-            default:
-                break;
-        }
-
         // if message passed was blockchain
         if (msg.getType().equalsIgnoreCase("BLOCKCHAIN")) {
 
             // send to blockchain to handle conflicts and merge
             Blockchain blockchain = new Blockchain();
             blockchain.manageConflicts(blockchain.deserialize(msg.getFile()));
+
+        } else if (msg.getType().equalsIgnoreCase("NODELIST")){
+
+            // send node list to database to merge
+            PeersDatabase db = new PeersDatabase();
+            db.mergeDatabase(db.deserialize(msg.getFile()));
+
+
+
+
+
+        } else if (msg.getType().equalsIgnoreCase("HANDSHAKE")){
+
+
+            // indicates that the node is joining the network
+            // send all assets back
+
+            FileSender fileSender = new FileSender();
+
+            fileSender.sendBlockChain(socketChannel);
+            fileSender.sendNodeList(socketChannel);
+
+
         }
 
     }
@@ -187,7 +199,7 @@ public class Node implements Serializable{
         return pubKey;
     }
 
-    public String getPubKeyStr(){
+    public String getPubKeyStr() {
         return pubKeyStr;
     }
 
