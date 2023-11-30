@@ -41,10 +41,9 @@ public class Node implements Serializable {
     }
 
     // create node with ip
-    public Node(String ip){
+    public Node(String ip) {
         this.ip = ip;
     }
-
 
     // get the public key
     public PublicKey getPublicKey() {
@@ -56,6 +55,7 @@ public class Node implements Serializable {
         return pubKey;
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////
     // listen for connections, handle in non blocking manner
     public void listener() {
 
@@ -115,9 +115,11 @@ public class Node implements Serializable {
         socketChannel.register(selector, SelectionKey.OP_READ);
         System.out.println("Connection accepted from: " + socketChannel.getRemoteAddress());
 
-        // utilize file sender to send block chain and node list
-        FileSender fileSender = new FileSender();
-        fileSender.sendAllAssets(socketChannel);
+
+
+        // // utilize file sender to send block chain and node list
+        // FileSender fileSender = new FileSender();
+        // fileSender.sendAllAssets(socketChannel);
 
     }
 
@@ -147,6 +149,7 @@ public class Node implements Serializable {
             decodeMessage(data, socketChannel);
         }
     }
+    ////////////////////////////////////////////////////////////////////////////////////////////
 
     private static void decodeMessage(byte[] data, SocketChannel socketChannel) {
 
@@ -176,24 +179,27 @@ public class Node implements Serializable {
             Blockchain blockchain = new Blockchain();
             blockchain.manageConflicts(blockchain.deserialize(msg.getFile()));
 
-        } else if (msg.getType().equalsIgnoreCase("NODELIST")){
+        } else if (msg.getType().equalsIgnoreCase("NODELIST")) {
 
             // send node list to database to merge
             PeersDatabase db = new PeersDatabase();
             db.mergeDatabase(msg.getFile());
 
-        } else if (msg.getType().equalsIgnoreCase("HANDSHAKE")){
-
+        } else if (msg.getType().equalsIgnoreCase("HANDSHAKE")) {
 
             // indicates that the node is joining the network
             // send all assets back
 
             FileSender fileSender = new FileSender();
+            fileSender.sendAllAssets(socketChannel);
+
+        } else if (msg.getType().equalsIgnoreCase("HANDSHAKE-RECV")) {
+
+            // respond to a node joining the network sending own files
+            FileSender fileSender = new FileSender();
 
             fileSender.sendBlockChain(socketChannel);
             fileSender.sendNodeList(socketChannel);
-
-
         }
 
     }
