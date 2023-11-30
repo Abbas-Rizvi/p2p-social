@@ -43,6 +43,12 @@ public class ServerUI {
                     server.listPeers();
                     break;
                 case 6:
+                    System.out.println("Enter recipient:");
+                    String ip = scanner.nextLine();
+                    server.connectNode(ip);
+                    break;
+
+                case 7:
                     System.out.println("Exiting...");
                     System.exit(0);
                 default:
@@ -58,7 +64,8 @@ public class ServerUI {
         System.out.println("3. Read Messages");
         System.out.println("4. Read Posts");
         System.out.println("5. List Peers");
-        System.out.println("6. Exit");
+        System.out.println("6. Connect IP");
+        System.out.println("7. Exit");
         System.out.print("Enter your choice: ");
     }
 }

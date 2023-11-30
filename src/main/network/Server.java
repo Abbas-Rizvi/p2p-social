@@ -118,16 +118,22 @@ public class Server extends Thread {
         // inform all other nodes in known peers
         for (Node node : db.readAllNodes()) {
 
-            // create message for new node addition
-            SockMessage updateChainMsg = new SockMessage("BLOCKCHAIN", time);
+            if (node.getIp().equals(hostIp().getHostAddress())) {
 
-            // Start a thread for each connection to inform
-            InterNetworkCom interNet = new InterNetworkCom(node, updateChainMsg);
-            interNet.start();
+            } else {
+
+                // create message for new node addition
+                SockMessage updateChainMsg = new SockMessage("BLOCKCHAIN", time);
+
+                // Start a thread for each connection to inform
+                InterNetworkCom interNet = new InterNetworkCom(node, updateChainMsg);
+                interNet.start();
+
+            }
+
         }
 
     }
-
 
     public static void createMessage(String recipient, String message) {
 
@@ -141,16 +147,21 @@ public class Server extends Thread {
         // inform all other nodes in known peers
         for (Node node : db.readAllNodes()) {
 
-            // create message for new node addition
-            SockMessage updateChainMsg = new SockMessage("BLOCKCHAIN", time);
+            if (node.getIp().equals(hostIp().getHostAddress())) {
 
-            // Start a thread for each connection to inform
-            InterNetworkCom interNet = new InterNetworkCom(node, updateChainMsg);
-            interNet.start();
+            } else {
+
+                // create message for new node addition
+                SockMessage updateChainMsg = new SockMessage("BLOCKCHAIN", time);
+
+                // Start a thread for each connection to inform
+                InterNetworkCom interNet = new InterNetworkCom(node, updateChainMsg);
+                interNet.start();
+
+            }
         }
 
     }
-
 
     public static void readMessages() {
 
@@ -166,7 +177,7 @@ public class Server extends Thread {
                 PrivateMsg message = (PrivateMsg) block;
 
                 // check if post is to user
-                // if so try to decrypt it 
+                // if so try to decrypt it
                 if (message.header.getRecipient().equalsIgnoreCase(username)) {
 
                     // output post
@@ -207,9 +218,9 @@ public class Server extends Thread {
 
     }
 
-    public static void listPeers(){
+    public static void listPeers() {
 
-        for (Node node : db.readAllNodes()){
+        for (Node node : db.readAllNodes()) {
 
             System.out.println(
                     "\033[32m" + node.getUsername() + "\t\t" +
@@ -237,12 +248,12 @@ public class Server extends Thread {
         }
 
         // connect laptop
-        connectNode("142.120.78.247");
+        // connectNode("142.120.78.247");
         // try {
-        //     sleep(100);
+        // sleep(100);
         // } catch (InterruptedException e) {
-        //     // TODO Auto-generated catch block
-        //     e.printStackTrace();
+        // // TODO Auto-generated catch block
+        // e.printStackTrace();
         // }
 
         // Create a new post for the block chain
@@ -251,7 +262,7 @@ public class Server extends Thread {
         // readPosts();
         // listPeers();
         // createMessage("Jimmy", "Hello Jimmy!");
-        readMessages();
+        // readMessages();
         // readPosts();
 
     }
@@ -261,7 +272,8 @@ public class Server extends Thread {
     @Override
     public void run() {
 
-        // System.out.println("Server listening on " + localNode.getIp() + ":" + localNode.getPORT() + "...");
+        // System.out.println("Server listening on " + localNode.getIp() + ":" +
+        // localNode.getPORT() + "...");
         localNode.listener();
 
     }
