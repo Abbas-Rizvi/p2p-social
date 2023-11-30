@@ -18,8 +18,11 @@ public class FileSender {
         // get time
         long time = timeService.getNTPDate().getTime();
 
+        String reqIP = sock.socket().getInetAddress().getHostAddress();
+        Node targNode = new Node(reqIP);
+
         // create objects for both chain and database
-        SockMessage msgChain = new SockMessage("BLOCKCHAIN", time,blockchain.serialize());
+        SockMessage msgChain = new SockMessage("BLOCKCHAIN", time, blockchain.serialize());
         SockMessage msgNodes = new SockMessage("NODELIST", time, db.serialize());
 
         // request files back from the node
@@ -27,12 +30,20 @@ public class FileSender {
 
         try {
 
-            // send both files over the socket
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(sock.socket().getOutputStream());
-            objectOutputStream.writeObject(msgChain);
-            objectOutputStream.writeObject(msgNodes);
-            objectOutputStream.writeObject(handshake);
-            System.out.println("chain and node list sent! : " + sock.getRemoteAddress());
+            // // send both files over the socket
+            // ObjectOutputStream objectOutputStream = new
+            // ObjectOutputStream(sock.socket().getOutputStream());
+
+            InterNetworkCom interNet = new InterNetworkCom(targNode, msgChain);
+            interNet.start();
+
+            InterNetworkCom interNet2 = new InterNetworkCom(targNode, msgNodes);
+            interNet2.start();
+
+            InterNetworkCom interNet3 = new InterNetworkCom(targNode, handshake);
+            interNet3.start();
+
+            System.out.println("HANDSHAKE INITIATED: " + sock.getRemoteAddress());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -40,21 +51,23 @@ public class FileSender {
 
     }
 
-
     // send nodeList stored on node
     public void sendNodeList(SocketChannel sock) {
 
         // get time
         long time = timeService.getNTPDate().getTime();
 
+        String reqIP = sock.socket().getInetAddress().getHostAddress();
+        Node targNode = new Node(reqIP);
+
         // create objects nodelist msg
         SockMessage msgNodes = new SockMessage("NODELIST", time, db.serialize());
 
         try {
 
-            // send file over the socket
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(sock.socket().getOutputStream());
-            objectOutputStream.writeObject(msgNodes);
+            InterNetworkCom interNet = new InterNetworkCom(targNode, msgNodes);
+            interNet.start();
+
             System.out.println("node list sent! : " + sock.getRemoteAddress());
 
         } catch (Exception e) {
@@ -63,21 +76,22 @@ public class FileSender {
 
     }
 
-    
     // send blockchain stored locally
     public void sendBlockChain(SocketChannel sock) {
 
         // get time
         long time = timeService.getNTPDate().getTime();
 
-        // create objects for chain 
-        SockMessage msgChain = new SockMessage("BLOCKCHAIN", time,blockchain.serialize());
+        String reqIP = sock.socket().getInetAddress().getHostAddress();
+        Node targNode = new Node(reqIP);
+        // create objects for chain
+        SockMessage msgChain = new SockMessage("BLOCKCHAIN", time, blockchain.serialize());
 
         try {
 
-            // send both files over the socket
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(sock.socket().getOutputStream());
-            objectOutputStream.writeObject(msgChain);
+            InterNetworkCom interNet = new InterNetworkCom(targNode, msgChain);
+            interNet.start();
+
             System.out.println("chain sent! : " + sock.getRemoteAddress());
 
         } catch (Exception e) {
