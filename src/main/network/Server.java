@@ -64,6 +64,8 @@ public class Server extends Thread {
 
         SockMessage msg2 = new SockMessage("BLOCKCHAIN", timeService.getNTPDate().getTime());
 
+
+
         for (Node node : peers) {
 
             try {

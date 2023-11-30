@@ -40,6 +40,13 @@ public class Node implements Serializable {
 
     }
 
+    // create node with ip
+    public Node(String ip){
+        this.ip = ip;
+    }
+
+
+    // get the public key
     public PublicKey getPublicKey() {
 
         // decode public key
