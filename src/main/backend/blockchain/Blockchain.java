@@ -86,13 +86,17 @@ public class Blockchain implements Serializable {
 
         // if nothing is stored
         if (!storeBlockchain.exists()) {
-
+            System.out.println("New chain imported!");
+            storeChain(proposedBlockchain.serialize());
             return proposedBlockchain;
 
         } else if (proposedBlockchain.chainLength() > blockchain.size()) {
-
+            System.out.println("New chain imported!");
+            storeChain(proposedBlockchain.serialize());
             return proposedBlockchain;
+
         } else {
+            System.out.println("Older chain kept!");
             return this;
         }
     }

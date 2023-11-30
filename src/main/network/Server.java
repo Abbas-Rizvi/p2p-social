@@ -49,7 +49,7 @@ public class Server extends Thread {
 
         ////////////////////////////////////////////////////////////////
         // connect to laptop
-        Node laptNode = new Node("192.168.194.147");
+        Node laptNode = new Node("192.168.194.181");
 
         //SockMessage msg = new SockMessage("HANDSHAKE", timeService.getNTPDate().getTime());
         SockMessage msg = new SockMessage("BLOCKCHAIN", timeService.getNTPDate().getTime(),blockchain.serialize());
