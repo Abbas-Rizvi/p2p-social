@@ -21,7 +21,9 @@ public class FileSender {
         // create objects for both chain and database
         SockMessage msgChain = new SockMessage("BLOCKCHAIN", time,blockchain.serialize());
         SockMessage msgNodes = new SockMessage("NODELIST", time, db.serialize());
-        SockMessage handshake = new SockMessage("HANDSHAKE", time);
+
+        // request files back from the node
+        SockMessage handshake = new SockMessage("HANDSHAKE-RECV", time);
 
         try {
 

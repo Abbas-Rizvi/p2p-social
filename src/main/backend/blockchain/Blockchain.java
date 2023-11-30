@@ -216,7 +216,7 @@ public class Blockchain implements Serializable {
         try {
             FileOutputStream fos = new FileOutputStream(filePath);
             fos.write(byteArray);
-            System.out.println("blockchain saved");
+            System.out.println("Blockchain has been updated!");
             fos.close();
         } catch (Exception e) {
             e.printStackTrace();

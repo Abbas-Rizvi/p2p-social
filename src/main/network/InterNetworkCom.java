@@ -40,7 +40,7 @@ public class InterNetworkCom extends Thread {
 
             System.out.println("Connected to " + node.getIp());
 
-            // Send the file bytes
+            // Send the file bytes            
             ByteBuffer buffer = ByteBuffer.wrap(sockMessage.serialize());
             socketChannel.write(buffer);
 

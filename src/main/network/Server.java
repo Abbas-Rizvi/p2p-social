@@ -22,20 +22,11 @@ public class Server extends Thread {
 
     // static String ip = InetAddress.getLocalHost().toString();
 
-    static Node localNode = new Node("Test", pubKey, "192.168.2.24");
+    static Node localNode = new Node("Test", pubKey, "192.168.194.147");
 
     static Blockchain blockchain = new Blockchain();
     static NTPTimeService timeService = new NTPTimeService();
 
-    public void setup() {
-
-        // create list of all known peers
-
-        // setup connections to each
-
-        //
-
-    }
 
     public static void main(String[] args) {
 
@@ -58,9 +49,10 @@ public class Server extends Thread {
 
         ////////////////////////////////////////////////////////////////
         // connect to laptop
-        Node laptNode = new Node("192.168.2.59");
+        Node laptNode = new Node("192.168.194.147");
 
-        SockMessage msg = new SockMessage("HANDSHAKE", timeService.getNTPDate().getTime());
+        //SockMessage msg = new SockMessage("HANDSHAKE", timeService.getNTPDate().getTime());
+        SockMessage msg = new SockMessage("BLOCKCHAIN", timeService.getNTPDate().getTime(),blockchain.serialize());
 
         InterNetworkCom interNet = new InterNetworkCom(laptNode, msg);
         interNet.start();
@@ -68,8 +60,9 @@ public class Server extends Thread {
 
 
         ////////////////////////////////////////////////////////////////
+ 
         BlockHeader msg1h = new BlockHeader(timeService.getNTPDate().getTime(), "public", "POST", user);
-        Block msg1 = new Post(blockchain.lastHash(), "Test Post", msg1h, key.getPrivatKey());
+        Block msg1 = new Post(blockchain.lastHash(), "another test Post", msg1h, key.getPrivatKey());
         blockchain.appendBlock(msg1);
 
         ////////////////////////////////////////////////////////////////

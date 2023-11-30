@@ -1,6 +1,7 @@
 package network;
 
 import java.io.ByteArrayInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -115,8 +116,6 @@ public class Node implements Serializable {
         socketChannel.register(selector, SelectionKey.OP_READ);
         System.out.println("Connection accepted from: " + socketChannel.getRemoteAddress());
 
-
-
         // // utilize file sender to send block chain and node list
         // FileSender fileSender = new FileSender();
         // fileSender.sendAllAssets(socketChannel);
@@ -127,44 +126,76 @@ public class Node implements Serializable {
     // parse message type
     private static void handleRead(SelectionKey key) throws IOException {
         SocketChannel socketChannel = (SocketChannel) key.channel();
-        ByteBuffer buffer = ByteBuffer.allocate(1024);
-
-        int bytesRead = socketChannel.read(buffer);
-
-        if (bytesRead == -1) {
-            // Connection closed by client
-            System.out.println("Connection closed by: " + socketChannel.getRemoteAddress());
-            socketChannel.close();
-            key.cancel();
-            return;
+        int bufferSize = 1024 * 1024 * 1024; // 1 GB
+        ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
+        
+        // Track the total number of bytes read
+        int totalBytesRead = 0;
+        
+        while (totalBytesRead < bufferSize) {
+            int bytesRead = socketChannel.read(buffer);
+        
+            if (bytesRead == -1) {
+                // Connection closed by client
+                System.out.println("Connection closed by: " + socketChannel.getRemoteAddress());
+                socketChannel.close();
+                key.cancel();
+                return;
+            }
+        
+            if (bytesRead > 0) {
+                totalBytesRead += bytesRead;
+            } else if (bytesRead == 0) {
+                // No more data to read
+                break;
+            }
         }
-
-        if (bytesRead > 0) {
-
-            // clear buffer
-            buffer.flip();
-            byte[] data = new byte[buffer.limit()];
+        
+        // Reset the position and limit to read the entire buffer
+        buffer.flip();
+        
+        // Check if any data was received
+        if (buffer.remaining() > 0) {
+            byte[] data = new byte[buffer.remaining()];
             buffer.get(data);
+        
             System.out.println("Received message from " + socketChannel.getRemoteAddress());
             decodeMessage(data, socketChannel);
         }
+        
     }
     ////////////////////////////////////////////////////////////////////////////////////////////
 
-    private static void decodeMessage(byte[] data, SocketChannel socketChannel) {
+    public static String decodeMessage(byte[] data, SocketChannel socketChannel) {
 
         SockMessage msg = null;
         // Convert input read from socket to object
         try {
 
-            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
-            ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
+            // ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
+            // ObjectInputStream objectInputStream = new
+            // ObjectInputStream(byteArrayInputStream);
 
-            Object inputMessage = objectInputStream.readObject();
+            // boolean check = true;
 
-            if (inputMessage instanceof SockMessage) {
-                msg = (SockMessage) inputMessage;
-            }
+            // Object inputMessage = null;
+
+            // while (check) {
+
+            // try {
+            // msg = (SockMessage) objectInputStream.readObject();
+            // } catch (EOFException e) {
+            // check = false;
+            // }
+            // }
+
+            ByteArrayInputStream in = new ByteArrayInputStream(data);
+            ObjectInputStream is = new ObjectInputStream(in);
+            Object obj = is.readObject();
+
+            msg = (SockMessage) obj;
+
+            // return is.readObject();
 
         } catch (IOException | ClassNotFoundException e) {
 
@@ -178,12 +209,14 @@ public class Node implements Serializable {
             // send to blockchain to handle conflicts and merge
             Blockchain blockchain = new Blockchain();
             blockchain.manageConflicts(blockchain.deserialize(msg.getFile()));
+            return "BLOCKCHAIN";
 
         } else if (msg.getType().equalsIgnoreCase("NODELIST")) {
 
             // send node list to database to merge
             PeersDatabase db = new PeersDatabase();
             db.mergeDatabase(msg.getFile());
+            return "NODELIST";
 
         } else if (msg.getType().equalsIgnoreCase("HANDSHAKE")) {
 
@@ -192,6 +225,7 @@ public class Node implements Serializable {
 
             FileSender fileSender = new FileSender();
             fileSender.sendAllAssets(socketChannel);
+            return "HANDSHAKE";
 
         } else if (msg.getType().equalsIgnoreCase("HANDSHAKE-RECV")) {
 
@@ -200,7 +234,10 @@ public class Node implements Serializable {
 
             fileSender.sendBlockChain(socketChannel);
             fileSender.sendNodeList(socketChannel);
+            return "HANDSHAKE-RECV";
         }
+
+        return null;
 
     }
 
