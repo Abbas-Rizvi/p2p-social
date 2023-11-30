@@ -167,7 +167,7 @@ public class Server extends Thread {
 
                 // check if post is to user
                 // if so try to decrypt it 
-                if (true || message.header.getRecipient().equalsIgnoreCase(username)) {
+                if (message.header.getRecipient().equalsIgnoreCase(username)) {
 
                     // output post
                     System.out.println(
@@ -230,15 +230,21 @@ public class Server extends Thread {
         nodeListen.start();
 
         // connect laptop
-        // connectNode("192.168.194.181");
+        connectNode("192.168.194.181");
+        // try {
+        //     sleep(100);
+        // } catch (InterruptedException e) {
+        //     // TODO Auto-generated catch block
+        //     e.printStackTrace();
+        // }
 
         // Create a new post for the block chain
         // createPost("public", "Hello public!");
 
         // readPosts();
         // listPeers();
-        // createMessage("test", "Hello Abbas!");
-        // readMessages();
+        // createMessage("Jimmy", "Hello Jimmy!");
+        readMessages();
         // readPosts();
 
     }
