@@ -39,10 +39,9 @@ public class Server extends Thread {
 
     public static void main(String[] args) {
 
-
         String user = db.lookupNameByPublicKey(pubKey);
 
-        if (db.insertRecord(localNode) == 1){
+        if (db.insertRecord(localNode) == 1) {
             System.out.println("User " + localNode.getUsername() + " aleady exists!");
         }
 
@@ -57,37 +56,62 @@ public class Server extends Thread {
 
         System.out.println("Code is running ");
 
+        ////////////////////////////////////////////////////////////////
+        // connect to laptop
+        Node node = new Node("192.168.2.59");
+
+        try {
+            // create socket channel
+            SocketChannel socketChannel = SocketChannel.open();
+            InetSocketAddress addr = new InetSocketAddress(node.getIp(), node.getPORT());
+            // connect without blocking
+            socketChannel.configureBlocking(false);
+
+            if (socketChannel.connect(addr)) {
+
+                System.out.println("Connected");
+                // Send the file bytes
+//                ByteBuffer buffer = ByteBuffer.wrap(msg2.getFile());
+//                socketChannel.write(buffer);
+
+            }
+
+        } catch (Exception e) {
+            System.err.println("unable to connect to " + node.getIp() + "; " + e);
+        }
+
+        ////////////////////////////////////////////////////////////////
         BlockHeader msg1h = new BlockHeader(timeService.getNTPDate().getTime(), "public", "POST", user);
         Block msg1 = new Post(blockchain.lastHash(), "Test Post", msg1h, key.getPrivatKey());
-
         blockchain.appendBlock(msg1);
 
+
+        ////////////////////////////////////////////////////////////////
         SockMessage msg2 = new SockMessage("BLOCKCHAIN", timeService.getNTPDate().getTime());
 
 
-
-        for (Node node : peers) {
-
-            try {
-                // create socket channel
-                SocketChannel socketChannel = SocketChannel.open();
-                InetSocketAddress addr = new InetSocketAddress(node.getIp(), node.getPORT());
-                // connect without blocking
-                socketChannel.configureBlocking(false);
-
-                if (socketChannel.connect(addr)) {
-
-                    // Send the file bytes
-                    ByteBuffer buffer = ByteBuffer.wrap(msg2.getFile());
-                    socketChannel.write(buffer);
-                }
-
-            } catch (Exception e) {
-                System.err.println("unable to connect to " + node.getIp() + "; " + e);
-            }
-
-        }
-
+//        for (Node node : peers) {
+//
+//            try {
+//                // create socket channel
+//                SocketChannel socketChannel = SocketChannel.open();
+//                InetSocketAddress addr = new InetSocketAddress(node.getIp(), node.getPORT());
+//                // connect without blocking
+//                socketChannel.configureBlocking(false);
+//
+//                if (socketChannel.connect(addr)) {
+//
+//                    // Send the file bytes
+//                    ByteBuffer buffer = ByteBuffer.wrap(msg2.getFile());
+//                    socketChannel.write(buffer);
+//                }
+//
+//            } catch (Exception e) {
+//                System.err.println("unable to connect to " + node.getIp() + "; " + e);
+//            }
+//
+//        }
+//
     }
 
     // Handle the running of the server

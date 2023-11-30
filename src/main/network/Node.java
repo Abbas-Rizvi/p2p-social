@@ -182,10 +182,6 @@ public class Node implements Serializable {
             PeersDatabase db = new PeersDatabase();
             db.mergeDatabase(msg.getFile());
 
-
-
-
-
         } else if (msg.getType().equalsIgnoreCase("HANDSHAKE")){
 
 

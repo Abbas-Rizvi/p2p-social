@@ -40,6 +40,8 @@ public class SockMessage implements Serializable {
             this.file = blockchain.serialize();
         } else if (type == "NODELIST") {
             this.file = db.serialize();
+        } else if (type == "HANDSHAKE"){
+            this.file = null;
         }
 
     }

@@ -155,6 +155,11 @@ public class Post implements Block {
         return data;
     }
 
+    // get the recipeint topic 
+    public String getRecipeint() {
+        return header.getRecipient();
+    }
+
 
     
 
