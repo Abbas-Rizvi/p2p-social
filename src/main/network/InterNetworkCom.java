@@ -4,7 +4,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
-public class InterObject extends Thread {
+public class InterNetworkCom extends Thread {
 
     static NTPTimeService timeService = new NTPTimeService();
 
@@ -12,7 +12,7 @@ public class InterObject extends Thread {
     Node node;
 
     // constructor
-    public InterObject(Node node, SockMessage sockMessage){
+    public InterNetworkCom(Node node, SockMessage sockMessage){
         this.node = node;
         this.sockMessage = sockMessage;
     }

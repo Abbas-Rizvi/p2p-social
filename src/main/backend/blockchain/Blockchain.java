@@ -58,7 +58,7 @@ public class Blockchain implements Serializable {
     // Blockchain Functions
     // ##################
 
-    private ArrayList<Block> getBlockchain() {
+    public ArrayList<Block> getBlockchain() {
         return blockchain;
     }
 

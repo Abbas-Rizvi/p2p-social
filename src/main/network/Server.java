@@ -62,8 +62,8 @@ public class Server extends Thread {
 
         SockMessage msg = new SockMessage("HANDSHAKE", timeService.getNTPDate().getTime());
 
-        InterObject interObject = new InterObject(laptNode, msg);
-        interObject.start();
+        InterNetworkCom interNet = new InterNetworkCom(laptNode, msg);
+        interNet.start();
 
 
 
@@ -104,7 +104,7 @@ public class Server extends Thread {
     @Override
     public void run() {
 
-        System.out.println("Server listening...");
+        System.out.println("Server listening on " + localNode.getIp() + ":" + localNode.getPORT() + "...");
         localNode.listener();
 
     }
