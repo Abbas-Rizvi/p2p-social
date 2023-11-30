@@ -21,10 +21,9 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
-public class KeyGen implements Serializable{
+public class KeyGen implements Serializable {
 
     private static final long serialVersionUID = 123456789L;
-
 
     private static final String RSA = "RSA";
 
@@ -32,17 +31,21 @@ public class KeyGen implements Serializable{
 
     // Generating public & private keys
     // using RSA algorithm.
-    public void generateRSAKkeyPair() throws Exception {
+    public void generateRSAKkeyPair() {
 
-        SecureRandom secureRandom = new SecureRandom();
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(RSA);
+        try {
+            SecureRandom secureRandom = new SecureRandom();
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(RSA);
 
-        keyPairGenerator.initialize(4096, secureRandom);
+            keyPairGenerator.initialize(4096, secureRandom);
 
-        kp = keyPairGenerator.generateKeyPair();
+            kp = keyPairGenerator.generateKeyPair();
 
-        storeKey(kp.getPrivate(), "./data/id_rsa");
-        storeKey(kp.getPublic(), "./data/id_rsa.pub");
+            storeKey(kp.getPrivate(), "./data/id_rsa");
+            storeKey(kp.getPublic(), "./data/id_rsa.pub");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     // store key for later use
@@ -81,9 +84,9 @@ public class KeyGen implements Serializable{
 
     }
 
-    //##########################
+    // ##########################
     // Public key functions
-    //##########################
+    // ##########################
 
     // connverts encoded public key to publicKey object
     public PublicKey convertPublicKey(String pubKeyStr) {
@@ -154,12 +157,9 @@ public class KeyGen implements Serializable{
         return null;
     }
 
-
-
-    //##########################
+    // ##########################
     // Private key functions
-    //##########################
-
+    // ##########################
 
     public String getPrivateKeyString() {
 
@@ -181,7 +181,6 @@ public class KeyGen implements Serializable{
 
         return null;
     }
-
 
     // connverts encoded public key to publicKey object
     public PrivateKey convertPrivateKey(String privKeyString) {

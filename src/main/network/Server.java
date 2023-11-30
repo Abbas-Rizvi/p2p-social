@@ -5,8 +5,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
-import javax.management.loading.PrivateClassLoader;
-
 import backend.blockchain.Block;
 import backend.blockchain.BlockHeader;
 import backend.blockchain.Blockchain;
@@ -22,7 +20,7 @@ public class Server extends Thread {
 
     static String username;
     static Node localNode;
-    static Blockchain blockchain = new Blockchain();
+    static Blockchain blockchain;
     static NTPTimeService timeService = new NTPTimeService();
 
     public static InetAddress hostIp() {
@@ -64,11 +62,14 @@ public class Server extends Thread {
 
         } else {
             key = new KeyGen();
+            key.generateRSAKkeyPair();
             username = db.lookupNameByPublicKey(db.lookupNameByPublicKey(key.getPublicKeyStr()));
 
             // create the local node
             localNode = new Node(username, key.getPublicKeyStr(), localIp);
         }
+
+        blockchain = new Blockchain();
 
     }
 
@@ -232,11 +233,11 @@ public class Server extends Thread {
         // connectNode("192.168.194.181");
 
         // Create a new post for the block chain
-        // createPost("public", "Hello post");
+        // createPost("public", "Hello public!");
 
         // readPosts();
         // listPeers();
-        createMessage("test", "Hello Abbas!");
+        // createMessage("test", "Hello Abbas!");
         // readMessages();
         // readPosts();
 
