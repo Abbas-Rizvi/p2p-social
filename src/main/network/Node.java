@@ -126,7 +126,7 @@ public class Node implements Serializable {
     // parse message type
     private static void handleRead(SelectionKey key) throws IOException {
         SocketChannel socketChannel = (SocketChannel) key.channel();
-        int bufferSize = 1024; // 1 KB, adjust as needed
+        int bufferSize = 1024 * 1024 * 1024; // 1 KB, adjust as needed
         ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
 
         // Track the total number of bytes read

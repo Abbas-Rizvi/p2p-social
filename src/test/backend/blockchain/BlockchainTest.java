@@ -15,17 +15,16 @@ public class BlockchainTest {
         Blockchain blockchain = new Blockchain();
         int count = 0;
 
-        for (Block block : blockchain.getBlockchain()){
+        for (Block block : blockchain.getBlockchain()) {
 
-            if (block instanceof Post){
-                System.out.println(block.getData() + block.getHash());
-                
-                count ++;
+            System.out.println(block.getData() + block.getHash());
 
-            }
+            count++;
+
         }
 
         System.out.println(count);
+
         assertEquals(count, blockchain.chainLength());
 
     }
