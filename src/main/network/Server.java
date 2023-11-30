@@ -49,7 +49,7 @@ public class Server extends Thread {
         if (checkKeysExist()) {
             // ------------------- todo ----------------------------
             // PROMPT USER FOR INPUT FOR A USERNAME
-            username = "Abbas";
+            username = "Mohammad";
 
             key = new KeyGen();
             // create the local node
@@ -171,9 +171,9 @@ public class Server extends Thread {
 
                     // output post
                     System.out.println(
-                            message.header.getSender() + " - " +
+                            "\033[32m" + message.header.getSender() + " - " +
                                     timeService.formatedTime(message.header.getTime()) + " : " +
-                                    message.decrypt(key.getPrivatKey()));
+                                    message.decrypt(key.getPrivatKey()) + "\033[0m");
                 }
 
             }
@@ -197,9 +197,9 @@ public class Server extends Thread {
 
                 // output post
                 System.out.println(
-                        post.header.getSender() + " - " +
+                        "\033[32m" + post.header.getSender() + " - " +
                                 timeService.formatedTime(post.header.getTime()) + " : " +
-                                post.getData());
+                                post.getData() + "\033[0m");
 
             }
 
@@ -212,8 +212,8 @@ public class Server extends Thread {
         for (Node node : db.readAllNodes()){
 
             System.out.println(
-                node.getUsername() + "\t\t" + 
-                node.getIp());
+                    "\033[32m" + node.getUsername() + "\t\t" +
+                            node.getIp() + "\033[0m");
 
         }
     }
@@ -229,8 +229,15 @@ public class Server extends Thread {
         Thread nodeListen = new Thread(server);
         nodeListen.start();
 
+        // Delay for a short period to allow setup to complete
+        try {
+            Thread.sleep(1000); // Adjust the sleep time as needed
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         // connect laptop
-        connectNode("192.168.194.181");
+        connectNode("142.120.78.247");
         // try {
         //     sleep(100);
         // } catch (InterruptedException e) {

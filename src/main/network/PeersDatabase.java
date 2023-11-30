@@ -29,29 +29,28 @@ public class PeersDatabase implements Serializable {
         }
     }
 
-    private Connection connect() throws SQLException {
-
+    private Connection connect() {
         Connection connection = null;
         try {
-
             // Register SQLite driver
             Class.forName("org.sqlite.JDBC");
-
-            try {
-                connection = DriverManager.getConnection(URL);
-            } catch (SQLException e) {
-                System.out.println(e.getMessage());
-            }
-
-        } catch (ClassNotFoundException e) {
-
-            // print error
-            System.out.println(e.getMessage());
-
+    
+            // Try to establish a connection
+            connection = DriverManager.getConnection(URL);
+    
+        } catch (ClassNotFoundException | SQLException e) {
+            // Handle exceptions
+            e.printStackTrace();
         }
-
+    
+        if (connection == null) {
+            System.err.println("Failed to establish a connection to the database.");
+            System.exit(1); // Terminate the program if the connection fails
+        }
+    
         return connection;
     }
+   
 
     private void createTable() throws SQLException {
         try (Connection connection = connect();
@@ -238,24 +237,6 @@ public class PeersDatabase implements Serializable {
         return allNodes;
     }
 
-    // // serialize database to byte[]
-    // public byte[] serialize() {
-    //
-    // // file path for storage
-    // String filePath = "./data/known_peers.db";
-    //
-    // try {
-    // Path path = Path.of(filePath);
-    // return Files.readAllBytes(path);
-    //
-    // } catch (Exception e) {
-    // e.printStackTrace();
-    // }
-    //
-    // return null;
-    // }
-
-    // Serialize List<Node> to byte[]
     public byte[] serialize() {
 
         // get node list

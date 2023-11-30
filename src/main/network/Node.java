@@ -57,7 +57,7 @@ public class Node implements Serializable {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////
-    // listen for connections, handle in non blocking manner
+    // listen for connections, handle in non-blocking manner
     public void listener() {
 
         try {
@@ -69,12 +69,12 @@ public class Node implements Serializable {
             serverSocketChannel.socket().bind(new InetSocketAddress(PORT));
             serverSocketChannel.configureBlocking(false);
 
-            // OP_ACCEPT is for when server accepts connection from client
+            // OP_ACCEPT is for when the server accepts connection from the client
             serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
 
             // System.out.println("Server started on port " + PORT);
 
-            // receive cconnections
+            // receive connections
             while (true) {
 
                 // ignore empty selector
@@ -86,15 +86,15 @@ public class Node implements Serializable {
 
                 // queue for incoming requests
                 while (keyIterator.hasNext()) {
-                    // remove from queue
+                    // remove from the queue
                     SelectionKey key = keyIterator.next();
                     keyIterator.remove();
 
                     if (key.isAcceptable()) {
-                        // handle connect req
+                        // handle connect request
                         handleAccept(key, selector);
                     } else if (key.isReadable()) {
-                        // handle read req
+                        // handle read request
                         handleRead(key);
                     }
                 }
@@ -116,7 +116,7 @@ public class Node implements Serializable {
         socketChannel.register(selector, SelectionKey.OP_READ);
         System.out.println("### Connection accepted from: " + socketChannel.getRemoteAddress());
 
-        // // utilize file sender to send block chain and node list
+        // // utilize file sender to send the blockchain and node list
         // FileSender fileSender = new FileSender();
         // fileSender.sendAllAssets(socketChannel);
 
@@ -126,23 +126,23 @@ public class Node implements Serializable {
     // parse message type
     private static void handleRead(SelectionKey key) throws IOException {
         SocketChannel socketChannel = (SocketChannel) key.channel();
-        int bufferSize = 1024 * 1024 * 1024   ; // 1 GB
+        int bufferSize = 1024; // 1 KB, adjust as needed
         ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
-        
+
         // Track the total number of bytes read
         int totalBytesRead = 0;
-        
+
         while (totalBytesRead < bufferSize) {
             int bytesRead = socketChannel.read(buffer);
-        
+
             if (bytesRead == -1) {
-                // Connection closed by client
+                // Connection closed by the client
                 System.out.println("Connection closed by: " + socketChannel.getRemoteAddress());
                 socketChannel.close();
                 key.cancel();
                 return;
             }
-        
+
             if (bytesRead > 0) {
                 totalBytesRead += bytesRead;
             } else if (bytesRead == 0) {
@@ -150,101 +150,74 @@ public class Node implements Serializable {
                 break;
             }
         }
-        
+
         // Reset the position and limit to read the entire buffer
         buffer.flip();
-        
+
         // Check if any data was received
         if (buffer.remaining() > 0) {
             byte[] data = new byte[buffer.remaining()];
             buffer.get(data);
-        
+
             // System.out.println("Received message from " + socketChannel.getRemoteAddress());
             decodeMessage(data, socketChannel);
         }
-        
     }
     ////////////////////////////////////////////////////////////////////////////////////////////
 
     public static String decodeMessage(byte[] data, SocketChannel socketChannel) {
 
         SockMessage msg = null;
-        // Convert input read from socket to object
-        try {
 
-            // ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
-            // ObjectInputStream objectInputStream = new
-            // ObjectInputStream(byteArrayInputStream);
-
-            // boolean check = true;
-
-            // Object inputMessage = null;
-
-            // while (check) {
-
-            // try {
-            // msg = (SockMessage) objectInputStream.readObject();
-            // } catch (EOFException e) {
-            // check = false;
-            // }
-            // }
-
-            ByteArrayInputStream in = new ByteArrayInputStream(data);
-            ObjectInputStream is = new ObjectInputStream(in);
-            Object obj = is.readObject();
-
-            msg = (SockMessage) obj;
-
-            // return is.readObject();
-
+        try (ByteArrayInputStream byteStream = new ByteArrayInputStream(data);
+             ObjectInputStream objectStream = new ObjectInputStream(byteStream)) {
+    
+            Object obj = objectStream.readObject();
+            if (obj instanceof SockMessage) {
+                msg = (SockMessage) obj;
+            }
+    
         } catch (IOException | ClassNotFoundException e) {
-
-            e.printStackTrace();
-
-        }
-        try {
-            System.out.println("Received " + msg.getType() + " From " + socketChannel.getRemoteAddress());
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    
+        if (msg != null) {
+            try {
+                System.out.println("Received " + msg.getType() + " From " + socketChannel.getRemoteAddress());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
-        // if message passed was blockchain
-        if (msg.getType().equalsIgnoreCase("BLOCKCHAIN")) {
+            // if the message passed was blockchain
+            if (msg.getType().equalsIgnoreCase("BLOCKCHAIN")) {
+                // send to blockchain to handle conflicts and merge
+                Blockchain blockchain = new Blockchain();
+                blockchain.manageConflicts(blockchain.deserialize(msg.getFile()));
+                return "BLOCKCHAIN";
 
-            // send to blockchain to handle conflicts and merge
-            Blockchain blockchain = new Blockchain();
-            blockchain.manageConflicts(blockchain.deserialize(msg.getFile()));
-            return "BLOCKCHAIN";
+            } else if (msg.getType().equalsIgnoreCase("NODELIST")) {
+                // send the node list to the database to merge
+                PeersDatabase db = new PeersDatabase();
+                db.mergeDatabase(msg.getFile());
+                return "NODELIST";
 
-        } else if (msg.getType().equalsIgnoreCase("NODELIST")) {
+            } else if (msg.getType().equalsIgnoreCase("HANDSHAKE")) {
+                // indicates that the node is joining the network
+                // send all assets back
+                FileSender fileSender = new FileSender();
+                fileSender.sendAllAssets(socketChannel);
+                return "HANDSHAKE";
 
-            // send node list to database to merge
-            PeersDatabase db = new PeersDatabase();
-            db.mergeDatabase(msg.getFile());
-            return "NODELIST";
+            } else if (msg.getType().equalsIgnoreCase("HANDSHAKE-RECV")) {
+                // respond to a node joining the network sending own files
+                FileSender fileSender = new FileSender();
+                fileSender.sendBlockChain(socketChannel);
+                fileSender.sendNodeList(socketChannel);
+                return "HANDSHAKE-RECV";
+            }
 
-        } else if (msg.getType().equalsIgnoreCase("HANDSHAKE")) {
-
-            // indicates that the node is joining the network
-            // send all assets back
-
-            FileSender fileSender = new FileSender();
-            fileSender.sendAllAssets(socketChannel);
-            return "HANDSHAKE";
-
-        } else if (msg.getType().equalsIgnoreCase("HANDSHAKE-RECV")) {
-
-            // respond to a node joining the network sending own files
-            FileSender fileSender = new FileSender();
-
-            fileSender.sendBlockChain(socketChannel);
-            fileSender.sendNodeList(socketChannel);
-            return "HANDSHAKE-RECV";
         }
-
         return null;
-
     }
 
     public PublicKey getPubKey() {
