@@ -108,6 +108,31 @@ public class PrivateMsg implements Block {
 
     }
 
+    public String decrypt(PrivateKey privateKey) {
+
+        try {
+            // initialize ciphers
+            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+
+            // decode Base64 string
+            byte[] encryptedBytes = Base64.getDecoder().decode(data);
+
+            // decrypt message
+            byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
+            String decryptedMessage = new String(decryptedBytes);
+
+            return decryptedMessage;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    
+
     // generate hash using time for randomness
     @Override
     public String currentHash() {
