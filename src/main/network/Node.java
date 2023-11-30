@@ -72,7 +72,7 @@ public class Node implements Serializable {
             // OP_ACCEPT is for when server accepts connection from client
             serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
 
-            System.out.println("Server started on port " + PORT);
+            // System.out.println("Server started on port " + PORT);
 
             // receive cconnections
             while (true) {
@@ -114,7 +114,7 @@ public class Node implements Serializable {
         SocketChannel socketChannel = serverSocketChannel.accept();
         socketChannel.configureBlocking(false);
         socketChannel.register(selector, SelectionKey.OP_READ);
-        System.out.println("Connection accepted from: " + socketChannel.getRemoteAddress());
+        System.out.println("### Connection accepted from: " + socketChannel.getRemoteAddress());
 
         // // utilize file sender to send block chain and node list
         // FileSender fileSender = new FileSender();
@@ -126,7 +126,7 @@ public class Node implements Serializable {
     // parse message type
     private static void handleRead(SelectionKey key) throws IOException {
         SocketChannel socketChannel = (SocketChannel) key.channel();
-        int bufferSize = 1024 * 1024 * 1024; // 1 GB
+        int bufferSize = 1024 * 1024 * 1024   ; // 1 GB
         ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
         
         // Track the total number of bytes read
@@ -159,7 +159,7 @@ public class Node implements Serializable {
             byte[] data = new byte[buffer.remaining()];
             buffer.get(data);
         
-            System.out.println("Received message from " + socketChannel.getRemoteAddress());
+            // System.out.println("Received message from " + socketChannel.getRemoteAddress());
             decodeMessage(data, socketChannel);
         }
         
@@ -201,6 +201,12 @@ public class Node implements Serializable {
 
             e.printStackTrace();
 
+        }
+        try {
+            System.out.println("Received " + msg.getType() + " From " + socketChannel.getRemoteAddress());
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
 
         // if message passed was blockchain

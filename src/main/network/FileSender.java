@@ -43,7 +43,7 @@ public class FileSender {
             InterNetworkCom interNet3 = new InterNetworkCom(targNode, handshake);
             interNet3.start();
 
-            System.out.println("HANDSHAKE INITIATED: " + sock.getRemoteAddress());
+            System.out.println("--- Handshake Initiated With : " + sock.getRemoteAddress() + " ---");
 
         } catch (Exception e) {
             e.printStackTrace();

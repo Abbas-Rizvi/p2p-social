@@ -21,7 +21,7 @@ public class InterNetworkCom extends Thread {
     // send message to node
     public void run() {
 
-        System.out.println("Thread started for sending to " + node.getIp());
+        // System.out.println("Thread started for sending to " + node.getIp());
         
         try {
             // create socket channel
@@ -38,16 +38,20 @@ public class InterNetworkCom extends Thread {
                 Thread.sleep(100); // sleep for a short duration
             }
 
-            System.out.println("Connected to " + node.getIp());
+            // System.out.println("# Connected to " + node.getIp());
 
             // Send the file bytes            
             ByteBuffer buffer = ByteBuffer.wrap(sockMessage.serialize());
             socketChannel.write(buffer);
 
+            if (socketChannel != null && socketChannel.isConnectionPending()) 
+                    socketChannel.close();
+
         } catch (
 
         Exception e) {
-            System.err.println("unable to connect to " + node.getIp() + "; " + e);
+            System.err.println("# Unable to connect to " + node.getIp() + "; " + e);
         }
+
     }
 }
