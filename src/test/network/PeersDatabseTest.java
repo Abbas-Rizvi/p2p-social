@@ -10,7 +10,7 @@ import org.junit.Test;
 import network.PeersDatabase;
 import network.Node;
 
-public class KeyDBHelperTest {
+public class PeersDatabseTest {
 
     PeersDatabase db = new PeersDatabase();
 

@@ -59,6 +59,7 @@ public class Blockchain implements Serializable {
     // ##################
 
     public ArrayList<Block> getBlockchain() {
+
         return blockchain;
     }
 
@@ -221,6 +222,11 @@ public class Blockchain implements Serializable {
             FileOutputStream fos = new FileOutputStream(filePath);
             fos.write(byteArray);
             System.out.println("Blockchain has been updated!");
+
+            // check if chain exists
+            File storeBlockchain = new File(filePath);
+            this.blockchain = deserialize(readChain(storeBlockchain)).getBlockchain();
+
             fos.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -243,7 +249,5 @@ public class Blockchain implements Serializable {
 
         return null;
     }
-
-
 
 }
