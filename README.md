@@ -16,7 +16,6 @@ Compile java classes
 
 `javac -cp "./src/main/:./lib/*" *.java`
 
-
 Run Server UI java class
 
 `java -Xmx1028m -cp "./src/main/:./lib/*" network.ServerUI`
