@@ -43,7 +43,7 @@ This signature and hash is then verified and evaluated by other nodes for accept
 
 ![image](https://github.com/Abbas-Rizvi/p2p-social/assets/73917749/fb3186e4-e6dc-406c-81a4-2222aa58ab60)
 
-
+---
 
 ### Networking 
 
