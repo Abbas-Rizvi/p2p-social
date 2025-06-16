@@ -35,10 +35,11 @@ An interface is provided for the creation of blocks which can be implemented wit
 
 ![image](https://github.com/Abbas-Rizvi/p2p-social/assets/73917749/4a61b78f-7135-47e3-a7d5-54f6e5aebb59)
 
+---
+
 New blocks being published to the blockchain have a unique hash generated which is then signed using the key of the node.
 This signature and hash is then verified and evaluated by other nodes for acceptance into the blockchain.
 
----
 
 ![image](https://github.com/Abbas-Rizvi/p2p-social/assets/73917749/fb3186e4-e6dc-406c-81a4-2222aa58ab60)
 
