@@ -75,7 +75,9 @@ Run Server UI java class
 ---
 
 ## Demo
-[Watch the demo](demo/p2pMerged.mp4)
+
+[![Watch the demo](https://img.youtube.com/vi/YOUTUBE_ID/0.jpg)](https://www.youtube.com/watch?v=pohBt3Sgewo)
+
 
 
 
