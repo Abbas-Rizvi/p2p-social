@@ -18,6 +18,8 @@ import java.util.Iterator;
 import backend.blockchain.Blockchain;
 import backend.crypt.KeyGen;
 
+import network.Server;
+
 public class Node implements Serializable {
 
     private static final long serialVersionUID = 123456789L;
@@ -190,9 +192,19 @@ public class Node implements Serializable {
 
             // if the message passed was blockchain
             if (msg.getType().equalsIgnoreCase("BLOCKCHAIN")) {
-                // send to blockchain to handle conflicts and merge
-                Blockchain blockchain = new Blockchain();
-                blockchain.manageConflicts(blockchain.deserialize(msg.getFile()));
+
+                // Deserialize the incoming chain
+                Blockchain loader = new Blockchain();
+                Blockchain proposed = loader.deserialize(msg.getFile());
+
+                // Merge/validate the proposed blockchain with the current one
+                Blockchain updated = loader.manageConflicts(proposed);
+
+                // Update the shared Server.blockchain instance so that it reflects the latest state
+                Server.blockchain = updated;
+                System.out.println("[SYNC] Imported chain from peer");
+
+                // Return so decodeMessage completes-handleRead will keep listening
                 return "BLOCKCHAIN";
 
             } else if (msg.getType().equalsIgnoreCase("NODELIST")) {
