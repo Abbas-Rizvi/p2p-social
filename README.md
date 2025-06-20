@@ -76,10 +76,7 @@ Run Server UI java class
 
 ## Demo
 
-[Watch the demo on YouTube](https://www.youtube.com/watch?v=pohBt3Sgewo)
-
-
-
+https://github.com/user-attachments/assets/75e1ca2e-ffb5-4131-a5b1-d47159b2eef8
 
 
 
