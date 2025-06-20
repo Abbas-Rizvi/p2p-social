@@ -60,13 +60,24 @@ Clone the gihub repo
 
 `$ git clone https://github.com/Abbas-Rizvi/p2p-social.git`
 
+Create dataset folder
+
+`mkdir data`
+
 Compile java classes
 
-`javac -cp "./src/main/:./lib/*" *.java`
+`javac -cp ".\lib\*" .\src\main\backend\blockchain\*.java .\src\main\backend\crypt\*.java .\src\main\network\*.java`
 
 Run Server UI java class
 
-`java -Xmx1028m -cp "./src/main/:./lib/*" network.ServerUI`
+`java -cp ".\lib\*;.\src\main" network.ServerUI`
+
+---
+
+## Demo
+[Watch the demo](demo/p2pMerged.mp4)
+
+
 
 
 
